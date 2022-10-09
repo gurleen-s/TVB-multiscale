@@ -1,0 +1,1 @@
+sim_res = postprocess_simulation_results('C:\Users\gsin255\Documents\GitHub\TVB-multiscale\C\output\BOLD_DH_20120806_parameter_file.txt_0.txt', fMRI(2).ts, RSN(2).RSN, RSNroi)

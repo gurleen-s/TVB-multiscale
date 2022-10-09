@@ -441,7 +441,12 @@ int main(int argc, char *argv[])
     fclose(ext_input_file);
     
     
+
+    /*
     
+    LOADING INPUT PARAMETERS
+    -----------------------------------------------------------------------------------------------------------------------------------------------
+    */
     /*
      Input-file mode is on: override some parameter-values as specified in additional param-file
      */
@@ -1061,7 +1066,7 @@ int main(int argc, char *argv[])
         
     }
     
-    //fprintf(FCout, "%.10f %.10f %.10f %.10f %.10f %.2f \n\n", G,w_plus, J_NMDA, eIf_e, eIf_i, current_best_FRmean);
+    fprintf(FCout, "%.10f %.10f %.10f %.10f %.10f %.2f \n\n", G,w_plus, J_NMDA, eIf_e, eIf_i, current_best_FRmean);
     for (i=0; i<(BOLD_len_i-BOLD_offset); i++) {
         for (j=0; j<num_output_ts; j++) {
             fprintf(FCout, "%.7f ",BOLD_ex[j][i+BOLD_offset]);

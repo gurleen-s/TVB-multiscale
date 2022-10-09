@@ -7,13 +7,38 @@ Quick instructions
 
 1. Compile the C code with a compiler with support for SSE instructions enabled. I found the following combination of flags yields good performance (in terms of simulation speed) with the GNU C compiler
 
-gcc  -Wall -std=c99 -msse2 -O3 -ftree-vectorize -ffast-math -funroll-loops -fomit-frame-pointer -m64 -lm TVBii.c -o tvb
+gcc  -Wall -std=c99 -msse2 -O3 -ftree-vectorize -ffast-math -funroll-loops -fomit-frame-pointer -m64 -lm TVBii_update.c -o tvb
 
 
 2. Create a folder “input” and a folder “output” in the folder where the newly created program binary is stored.
 
 
-3. Create input files for each subject-specific brain model using the MATLAB script 'generate_input_SC.m' and store them in the folder 'input'. For each subject three input files are required. They contain (i) connection strengths, (ii) connection lengths (unit: mm), and (iii) the node-ids of the connected nodes in files (i) and (ii). The MATLAB script converts structural connectivity from a matrix representation (strengths matrix and delay matrix) into a list format that can be read by the hybrid model program. In addition, the user needs to supply a file of floating point values separated by whitespaces that contains the time series (sampled at 1000 Hz, format: regions x time steps [rows x columns]) that are to be injected into the model populations. These files must also be stored in the folder 'input'. To compute the input time series, the provided [empirical EEG source activity](https://osf.io/mndt8/), which is sampled at 200 Hz, must be upsampled to 1000 Hz using the script [generate_hybrid_model_input.m](https://github.com/BrainModes/The-Hybrid-Virtual-Brain/blob/master/MATLAB/generate_hybrid_model_input.m). Different types of input were considered during the experimental phase of the project (EEG source activity, randomly permutated EEG source activity inputs, temporal differences of source activity, artificial alpha, etc.), for an overwiew see the different cases beginning at line 239 of TVBii.c. The different modes can be switched with the <input_case> argument shown in the next step. The standard case for source activity injection is case "0" and it expects a file of the format <subject\_id>\_fullextinp1000.txt in the 'input' folder.
+3. 
+(A) Create input files from the DTI data
+ The structural connectivity matrix 'SC.mat' is processed using 'generate_input_SC.m' and the files stored in folder 'input': 
+
+        For each subject three input files are required. They contain: 
+        (i) connection strengths, 
+        (ii) connection lengths (unit: mm), and 
+        (iii) the node-ids of the connected nodes in files (i) and (ii). 
+
+        The MATLAB script converts structural connectivity from a matrix representation (strengths matrix and delay matrix) into a list format that can be read by the hybrid model program. 
+
+(B) Up sample 
+The [empirical EEG source activity](https://osf.io/mndt8/), sampled at 200 Hz must be upsampled to 1000 Hz using the script [generate_hybrid_model_input.m](https://github.com/BrainModes/The-Hybrid-Virtual-Brain/blob/master/MATLAB/generate_hybrid_model_input.m)
+
+Supply a file of floating point values separated by whitespaces that contains the time series (sampled at 1000 Hz, format: regions x time steps [rows x columns]) that are to be injected into the model populations 
+
+Store in the folder 'input' 
+
+Different types of input were experimented on, see cases at line 239 of TVBii.c:
+    - EEG source activity, 
+    - randomly permutated EEG source activity inputs, 
+    - temporal differences of source activity, 
+    - artificial alpha, etc., 
+
+Modes can be switched with the <input_case> argument. The standard case for source activity injection is case "0" and it expects a file in 'input folder' of the format: 
+    - <subject\_id>\_fullextinp1000.txt 
 
 
 4. Run the program in the folder from a terminal. The program expects three arguments:
@@ -32,8 +57,18 @@ gcc  -Wall -std=c99 -msse2 -O3 -ftree-vectorize -ffast-math -funroll-loops -fomi
 'input/<subject_name>_fullextinp1000.txt'
 
 
-5. Outputs are stored in the folder 'output'. Files with prefix 'BOLD_' contain simulated fMRI time series (time x nodes)- Files with prefix 'SV_' contain state variables (time x n * state_variable). Please refer to lines 885 to 923 of the C code for the sorting of state variables. If you perform a large number of simulations, consider commenting out these lines, as the produced state variable files will be very large (several GB per file depending on simulated time).
+5. Outputs are stored in the folder 'output'. 
+Files with prefix 'BOLD_' contain simulated fMRI time series (time x nodes)- Files with prefix 'SV_' contain state variables (time x n * state_variable). 
+Please refer to lines 885 to 923 of the C code for the sorting of state variables. 
+If you perform a large number of simulations, consider commenting out these lines, as the produced state variable files will be very large (several GB per file depending on simulated time).
   
 
 
 Questions? michael.schirner@charite.de or petra.ritter@charite.de
+
+
+
+empirical_structural_connectomes -> SCs.mat
+    - SC struct
+        - sub_id: 15 IDs
+        - weights variable of dimension: 68x68 for each sub_id

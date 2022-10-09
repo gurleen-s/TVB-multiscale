@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
     const float dt                = 0.1;              //      Integration step length dt = 0.1 ms
     const float model_dt          = 0.001;            // (Hz) Time-step of model (sampling-rate=1000 Hz)
     const int vectorization_grade = 4;                // depends on CPU Architecture and available intrinsics.
-    int   time_steps              = 667*TR*1000;      // simulation length: 667 TRs * 1.94 s/TR * 1000 time-steps/s
+    int   time_steps              = 667*TR*1000;      // simulation length: 667 TRs * 1.94 s/TR * 1000 time-steps/s   --------------------------1000------
     int   time_steps_FIC_burnin   = 10*1000;          // 10 s as a burn-in for FIC tuning to let model activity stabilized
     int   time_steps_FIC_fit      = time_steps - time_steps_FIC_burnin;
     const int   nodes             = 68;               // Number of nodes; must be a multiple of vectorization grade
@@ -952,6 +952,7 @@ int main(int argc, char *argv[])
     for (i=0; i<(BOLD_len_i-BOLD_offset); i++) {
         for (j=0; j<num_output_ts; j++) {
             fprintf(FCout, "%.7f ",BOLD_ex[j][i+BOLD_offset]);
+            printf("%.7f ",BOLD_ex[j][i+BOLD_offset]);
         }
         fprintf(FCout, "\n");
     }
