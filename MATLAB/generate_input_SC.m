@@ -20,11 +20,19 @@
 % target regions for each region of the brain model
 
 
-function generate_input_SC(SC, output_filestem)
 
+function generate_input_SC(SC, output_filestem)
+    %disp(SC);
+    %SC_test = SC(2).weights;
+    %SC = SC(2);
+    
+    
     % Normalize SC by dividing through maximum value
     SC          = SC ./ max(SC(:));
     SCsize      = size(SC,1);
+    
+    disp('sc size:');
+    disp(SCsize);
     
     % OPTIONAL: Set low coupling values to zero
     %sumSC       = sum(SC);
@@ -48,12 +56,15 @@ function generate_input_SC(SC, output_filestem)
     dlmwrite(sc_dist_file,maxdist,'delimiter',' ','-append');
 
     % Write connection weights, distances and input-region IDs
-    for ii = 1:SCsize,
+    for ii = 1:SCsize
         % Select all non-zero connections
-        inpregs     =   find(SC(ii,:)>0);
+        inpregs     =   find(SC(ii,:) >0);
+        
         inpcaps     =   SC(ii,inpregs);
-        inpdists    =   sc_dist(ii,inpregs);
 
+        % does not work so will initial distance as 1 for now -----------
+        %inpdists    =   sc_dist(ii,inpregs);
+        inpdists    = ones(size(inpregs));
         % Write connectivity description for each node
         % Convert from Matlab-style 1-based numbering to C-style 0-based 
         % numbering
