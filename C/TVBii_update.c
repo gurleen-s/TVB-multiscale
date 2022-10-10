@@ -16,6 +16,8 @@
 #include <string.h>
 #include <math.h>
 
+//SECTION - 0 Model Setup
+
 struct Xi_p{
     float **Xi_elems;
 };
@@ -27,6 +29,8 @@ struct SC_capS{
 FILE *FCout, *WFout, *Sout;
 
 /*
+ // SECTION - Creating output file
+
  Open files for writing simulated activity
  */
 void openFCoutfile(char *paramset, int myid, char *sub_id){
@@ -61,7 +65,7 @@ void openFCoutfile(char *paramset, int myid, char *sub_id){
     Sout = fopen(outfilename, "w");
      */
 }
-
+    //!SECTION
 
 /*
  Import SC (long-range coupling) and convert into efficient data structure
@@ -242,6 +246,8 @@ int main(int argc, char *argv[])
         exit(0);
     }
     
+    //SECTION - Input activity type
+
     // Open output files and switch between different types of input activity
     char outputfolder[100];memset(outputfolder, 0, 100*sizeof(char));
     char subject_file[100];memset(subject_file, 0, 100*sizeof(char));
@@ -292,7 +298,9 @@ int main(int argc, char *argv[])
     }
     openFCoutfile(argv[1], myid, argv[2]);
     
+    //!SECTION
     
+    //SECTION: Model parameters
     
     /*
      Global model and integration parameters
@@ -324,7 +332,8 @@ int main(int argc, char *argv[])
     float tmp_E[4]          __attribute__((aligned(16)));
     float tmp_I[4]          __attribute__((aligned(16)));
     
-    
+
+    //SECTION - DMF params Deco '14
     /*
      Local model: DMF-Parameters from Deco et al. JNeuro 2014
      */
@@ -357,10 +366,11 @@ int main(int argc, char *argv[])
     const float w_I__I_0      = w_I * I_0;
     const float one           = 1.0;
     const float w_plus__J_NMDA= w_plus * J_NMDA;
-    
+
+    //!SECTION
     
     /*
-     Allocate and Initialize arrays
+    Initialize arrays
      */
     // Brain network model arrays
     float *ext_input = (float *)_mm_malloc(time_steps*nodes * sizeof(float),16);
@@ -377,6 +387,8 @@ int main(int argc, char *argv[])
     float *global_input             = (float *)_mm_malloc(nodes * sizeof(float),16);
     float *J_i                      = (float *)_mm_malloc(nodes * sizeof(float),16);  // (nA) inhibitory synaptic coupling
     float *meanFR                   = (float *)_mm_malloc(nodes * sizeof(float),16);  // summation array for mean firing rate
+
+
     //Balloon-Windkessel model arrays (see Deco et al. 2014 JNeuro)
     int   output_ts = time_steps / (TR / model_dt);                             // Length of BOLD time-series written to HDD
     int   num_output_ts      = 68;                                              // Number of BOLD time-series that are writte to HDD
@@ -394,6 +406,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     
+    //SECTION - State variables
     // Initialize model state variables / parameters
     for (j = 0; j < nodes; j++) {
         S_i_E[j]            = 0.001;
@@ -402,7 +415,9 @@ int main(int argc, char *argv[])
         meanFR[j]           = 0.0;
         J_i[j]              = 1.0;
     }
-    
+    //!SECTION
+
+    //SECTION: BWM variables
     // Initialize Balloon-Windkessel model parameters and arrays
     for (j = 0; j < num_output_ts; j++) {
         bw_x_ex[j] = 0.0;
@@ -420,8 +435,10 @@ int main(int argc, char *argv[])
     float f_tmp;
     int   BOLD_offset = 11;
     int   BOLD_len_i  = -1;
+    //!SECTION
     
-    
+
+    //SECTION - Load ext. input
     /*
      Load external input -- to be injected into hybrid model
      */
@@ -440,8 +457,9 @@ int main(int argc, char *argv[])
     }
     fclose(ext_input_file);
     
+    //!SECTION
     
-
+    //SECTION - Load input params
     /*
     
     LOADING INPUT PARAMETERS
@@ -541,11 +559,12 @@ int main(int argc, char *argv[])
     __m128          *_meanFR            = (__m128*)meanFR;
     __m128          _tmp_I_E, _tmp_I_I;
     __m128          _tmp_H_E, _tmp_H_I;
+    //!SECTION - Load ext. input
+    //!SECTION - Model Params
+    //!SECTION - 0 Model Setup
     
-    
-    
-    
-    
+
+    //SECTION: 1 FIC Tuning
     /************
      FIC tuning
      ************/
@@ -556,8 +575,6 @@ int main(int argc, char *argv[])
     float avg_previous_Ji_change=0, avg_previous_FR_change, current_best_FRdistance=9999999.0, current_best_FRmean = 0.0,       previous_mean_meanFR=0,previous_adaptive_tuning_factor = tuning_factor, current_best_FR_SD=0.0, maximum_tuning_factor=-1;
     int is_improved = 0, is_fine_tuning=-1;
     int ts, int_i, i_node_vec, FIC_iter, ext_inp_counter=0;
-    
-
     
     
     /*
@@ -675,6 +692,10 @@ int main(int argc, char *argv[])
             exit(0);
         }
         */
+
+       //!SECTION
+
+       //SECTION - 2 Simulate, compute mean FR
         /*
          Phase II: Simulate full time series and compute mean firing rate for each node
          */
@@ -746,8 +767,10 @@ int main(int argc, char *argv[])
             }
             ext_inp_counter += nodes_vec;
         }
+        //!SECTION
 
-        
+
+        //SECTION 3 J_i tuning
         /*
          Phase III: Evaluate mean FR and adapt J_i
          */
@@ -872,9 +895,10 @@ int main(int argc, char *argv[])
         J_i[j] = Ji_save_bestFRdistance[j];
     }
     
+    //!SECTION 3 J_i tuning end
     
     
-    
+    //SECTION - 4 Simulate Brain
     /************************************************
      The actual simulation with fitted J_i parameters
      *************************************************/
@@ -1086,4 +1110,6 @@ int main(int argc, char *argv[])
     
     printf("%d finished. Execution took %.2f s\n", myid, (float)(time(NULL) - start));
     return 0;
+
+    //!SECTION
 }
